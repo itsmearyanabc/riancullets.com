@@ -43,10 +43,10 @@ That is the whole setup. The pages need no content: every page is a
 template in this theme, so it looks exactly like the design preview
 from the moment it is activated.
 
-## Live hosting: Cloudflare Pages
+## Live hosting: Cloudflare
 
-The production site is a static export on Cloudflare Pages, with the
-enquiry form handled by a Pages Function. See
+The production site is a static export served by a Cloudflare Worker
+(`wrangler.jsonc`), which also handles the enquiry form. See
 [`cloudflare/README.md`](cloudflare/README.md) for deployment, form
 delivery settings and the update workflow.
 

@@ -1,43 +1,42 @@
-# Cloudflare Pages deployment
+# Cloudflare deployment
 
-The live site runs as static files on Cloudflare Pages. WordPress (the
+The live site runs as static files on a Cloudflare Worker (static assets),
+with the enquiry form handled by the same Worker. WordPress (the
 theme in `wp-content/themes/rian-cullet`) is still where the site is
 built and edited; `tools/export-static.py` turns it into the files in
 `public/`.
 
 ```
+wrangler.jsonc              Worker config (repository root)
 cloudflare/
 ├── public/                 generated site (commit it; Cloudflare serves it)
-├── functions/api/enquiry.js  enquiry form handler (POST /api/enquiry)
-├── src/                    copied into public/: _headers, _redirects, enquiry.js
-└── wrangler.toml
+├── worker.js               Worker entry: static files + /api/enquiry
+├── functions/api/enquiry.js  enquiry form handler
+└── src/                    copied into public/: _headers, _redirects, enquiry.js
 ```
 
-## First deployment (Git integration, recommended)
+## Deployment (Cloudflare Workers, connected to GitHub)
 
-Cloudflare's drag-and-drop upload does **not** run Functions, so the
-enquiry form needs Git or Wrangler.
-
-1. Push this repository to GitHub (`public/` included).
-2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**,
-   pick the repository.
-3. Build settings:
-   - Framework preset: **None**
+1. Make sure the changes are on `main` (merge the pull request).
+2. Cloudflare dashboard → **Workers & Pages → Create → Import a repository**,
+   pick this repository. Settings:
+   - Root directory: **`/`** (the repository root)
    - Build command: *(leave empty)*
-   - Build output directory: **`public`**
-   - Root directory (advanced): **`cloudflare`**
-4. **Save and Deploy.** You get a `*.pages.dev` preview URL. Check it.
-
-Alternative without Git: `npx wrangler pages deploy` from the
-`cloudflare/` folder (this also uploads `functions/`).
+   - Deploy command: **`npx wrangler deploy`**
+3. The Worker's name must match `"name"` in `wrangler.jsonc`
+   (`riancullets-com`). If you named it differently, change that line,
+   commit and push.
+4. Deploy. You get a `*.workers.dev` URL. Check it.
 
 ## Make the enquiry form deliver
 
-In the Pages project → **Settings → Variables and Secrets / Bindings**:
+In the Worker → **Settings → Variables and Secrets** (for KV: create the
+namespace under **Storage & Databases → KV**, then add its id to the
+`kv_namespaces` line in `wrangler.jsonc`):
 
 | Name | Type | Value |
 |---|---|---|
-| `ENQUIRIES` | KV namespace binding | create a namespace, e.g. `rian-enquiries` |
+| `ENQUIRIES` | KV binding, set in `wrangler.jsonc` | create a namespace, e.g. `rian-enquiries`, paste its id |
 | `RESEND_API_KEY` | Secret | API key from resend.com (free tier is enough) |
 | `ENQUIRY_TO` | Variable | inbox for enquiries; several allowed, comma separated |
 | `ENQUIRY_FROM` | Variable | e.g. `Rian Cullet <enquiries@riancullets.com>` (domain verified in Resend) |
@@ -54,8 +53,8 @@ settings.
    domain's nameservers to Cloudflare's at the registrar.
    **Before switching, copy any email (MX/TXT) records** from Hostinger so
    mail keeps working.
-2. Pages project → **Custom domains** → add `riancullets.com` and
-   `www.riancullets.com`.
+2. Worker → **Settings → Domains & Routes → Add → Custom domain**:
+   `riancullets.com` and `www.riancullets.com`.
 3. Redirect www to the bare domain: **Rules → Redirect Rules →**
    `www.riancullets.com/*` → `https://riancullets.com/${1}` (301).
 4. SSL/TLS → **Full (strict)**; turn **Rocket Loader off**.
@@ -76,7 +75,7 @@ redirected by `src/_redirects`.
 
    The export stops with an error if any page fails, shows a PHP error
    or still contains a local URL.
-3. Commit and push. Cloudflare redeploys automatically.
+3. Commit and push to `main`. Cloudflare redeploys automatically.
 
 After launch, submit `https://riancullets.com/sitemap.xml` in Google
 Search Console.
