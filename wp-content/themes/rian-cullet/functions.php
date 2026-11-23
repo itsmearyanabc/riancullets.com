@@ -12,7 +12,7 @@ declare( strict_types = 1 );
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'RC_VERSION', '1.1.0' );
+define( 'RC_VERSION', '1.2.0' );
 define( 'RC_DIR', get_template_directory() );
 define( 'RC_URI', get_template_directory_uri() );
 
@@ -25,14 +25,22 @@ define( 'RC_COMBINED_EXPERIENCE', 65 ); // Years, combined across the team.
 define( 'RC_COMPANIES_SERVED', 35 );
 define( 'RC_STATES_SERVED', 22 );
 
+/**
+ * The trading name. Used wherever the WordPress Site Title is missing or
+ * was left as the bare domain.
+ */
+define( 'RC_BRAND_NAME', 'Rian Cullet' );
+
 require_once RC_DIR . '/inc/helpers.php';
 require_once RC_DIR . '/inc/setup.php';
 require_once RC_DIR . '/inc/enqueue.php';
 require_once RC_DIR . '/inc/seo.php';
+require_once RC_DIR . '/inc/seo-pages.php';
 require_once RC_DIR . '/inc/schema.php';
 require_once RC_DIR . '/inc/enquiry-form.php';
 require_once RC_DIR . '/inc/patterns.php';
 require_once RC_DIR . '/inc/customizer.php';
+require_once RC_DIR . '/inc/provision.php';
 
 if ( is_admin() ) {
 	require_once RC_DIR . '/inc/starter-content.php';

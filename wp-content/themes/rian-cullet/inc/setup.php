@@ -131,6 +131,14 @@ add_action(
 		remove_action( 'wp_head', 'wp_generator' );
 		remove_action( 'wp_head', 'wlwmanifest_link' );
 		remove_action( 'wp_head', 'rsd_link' );
+		remove_action( 'wp_head', 'wp_shortlink_wp_head' );
+		remove_action( 'wp_head', 'rest_output_link_wp_head' );
+		remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
+		remove_action( 'template_redirect', 'rest_output_link_header', 11 );
+		remove_action( 'template_redirect', 'wp_shortlink_header', 11 );
+		remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
+		remove_action( 'wp_footer', 'wp_enqueue_global_styles', 1 );
+		remove_action( 'wp_head', 'wp_print_auto_sizes_contain_css_fix', 1 );
 	}
 );
 
@@ -143,6 +151,15 @@ add_action(
 	static function (): void {
 		wp_dequeue_style( 'classic-theme-styles' );
 		wp_dequeue_style( 'global-styles' );
+
+		// Every page is a theme template; block CSS (~19KB inline) is only
+		// needed where an editor has actually written block content.
+		$post = get_queried_object();
+		if ( ! ( $post instanceof WP_Post && has_blocks( $post ) ) ) {
+			wp_dequeue_style( 'wp-block-library' );
+			wp_dequeue_style( 'wp-block-library-theme' );
+			wp_dequeue_style( 'wp-img-auto-sizes-contain' );
+		}
 	},
 	20
 );

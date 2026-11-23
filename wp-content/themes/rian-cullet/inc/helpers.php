@@ -76,6 +76,57 @@ function rc_image_sources( string $name ): array {
 }
 
 /**
+ * Build a srcset for one format from the -<width>w variants on disk.
+ *
+ * tools/build-images.sh writes <name>-640w.avif, <name>-1024w.avif and so
+ * on beside the original. The original is always the widest candidate.
+ * Returns the plain URL when no variants exist, so nothing breaks before
+ * the script has been run.
+ *
+ * @param string $name       Filename without extension.
+ * @param string $ext        Format extension.
+ * @param string $full_url   URL of the original.
+ * @param int    $full_width Intrinsic width of the original.
+ * @return string
+ */
+function rc_image_srcset( string $name, string $ext, string $full_url, int $full_width ): string {
+
+	static $cache = array();
+	$key = $name . '.' . $ext;
+
+	if ( ! isset( $cache[ $key ] ) ) {
+		$widths = array();
+		$files  = glob( RC_DIR . '/assets/img/' . $name . '-*w.' . $ext );
+
+		foreach ( (array) $files as $file ) {
+			if ( preg_match( '/-(\d+)w\.' . preg_quote( $ext, '/' ) . '$/', (string) $file, $m ) ) {
+				$widths[] = (int) $m[1];
+			}
+		}
+
+		sort( $widths );
+		$cache[ $key ] = $widths;
+	}
+
+	if ( ! $cache[ $key ] ) {
+		return esc_url( $full_url );
+	}
+
+	$parts = array();
+
+	foreach ( $cache[ $key ] as $w ) {
+		if ( $w >= $full_width ) {
+			continue;
+		}
+		$parts[] = esc_url( RC_URI . '/assets/img/' . $name . '-' . $w . 'w.' . $ext ) . ' ' . $w . 'w';
+	}
+
+	$parts[] = esc_url( $full_url ) . ' ' . $full_width . 'w';
+
+	return implode( ', ', $parts );
+}
+
+/**
  * Render a responsive figure, or a clearly-labelled placeholder.
  *
  * @param array{
@@ -97,6 +148,8 @@ function rc_figure( array $args ): void {
 			'width'    => 1600,
 			'height'   => 1067,
 			'tag'      => 'figure',
+			'sizes'    => '(min-width: 62rem) 45vw, 100vw',
+			'lowpri'   => false,
 		)
 	);
 
@@ -130,11 +183,20 @@ function rc_figure( array $args ): void {
 	foreach ( array( 'avif' => 'image/avif', 'webp' => 'image/webp' ) as $ext => $type ) {
 		if ( isset( $sources[ $ext ] ) ) {
 			printf(
-				'<source srcset="%1$s" type="%2$s">',
-				esc_url( $sources[ $ext ] ),
+				'<source srcset="%1$s" sizes="%2$s" type="%3$s">',
+				rc_image_srcset( $args['name'], $ext, $sources[ $ext ], (int) $args['width'] ), // phpcs:ignore WordPress.Security.EscapeOutput -- escaped per URL.
+				esc_attr( $args['sizes'] ),
 				esc_attr( $type )
 			);
 		}
+	}
+
+	if ( $args['priority'] ) {
+		$loading = 'loading="eager" fetchpriority="high" decoding="async"';
+	} elseif ( $args['lowpri'] ) {
+		$loading = 'loading="lazy" fetchpriority="low" decoding="async"';
+	} else {
+		$loading = 'loading="lazy" decoding="async"';
 	}
 
 	printf(
@@ -143,9 +205,7 @@ function rc_figure( array $args ): void {
 		esc_attr( $args['alt'] ),
 		(int) $args['width'],
 		(int) $args['height'],
-		$args['priority']
-			? 'loading="eager" fetchpriority="high" decoding="async"'
-			: 'loading="lazy" decoding="async"'
+		$loading // phpcs:ignore WordPress.Security.EscapeOutput -- fixed strings.
 	);
 
 	echo '</picture>';
@@ -460,4 +520,44 @@ function rc_hero_slides(): array {
 	 * @param array<int, array<string, mixed>> $slides Slide definitions.
 	 */
 	return (array) apply_filters( 'rc_hero_slides', $slides );
+}
+
+/**
+ * Breadcrumb trail for the current page: Home, then the page.
+ *
+ * Shared by the visible trail on landing pages and the BreadcrumbList
+ * structured data, so the two can never disagree.
+ *
+ * @return array<int, array{label:string, url:string}>
+ */
+function rc_breadcrumbs(): array {
+
+	$crumbs = array(
+		array(
+			'label' => __( 'Home', 'rian-cullet' ),
+			'url'   => home_url( '/' ),
+		),
+	);
+
+	if ( is_front_page() ) {
+		return $crumbs;
+	}
+
+	$label = '';
+
+	if ( is_page() && function_exists( 'rc_current_seo_page' ) ) {
+		$page  = rc_current_seo_page();
+		$label = $page ? (string) $page['nav'] : '';
+	}
+
+	if ( '' === $label ) {
+		$label = is_singular() ? (string) get_the_title() : wp_strip_all_tags( html_entity_decode( wp_get_document_title(), ENT_QUOTES, 'UTF-8' ) );
+	}
+
+	$crumbs[] = array(
+		'label' => $label,
+		'url'   => '',
+	);
+
+	return $crumbs;
 }

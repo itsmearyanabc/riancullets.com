@@ -42,24 +42,64 @@
   var darkSections = document.querySelectorAll('[data-nav="dark"]');
 
   if (darkSections.length && 'IntersectionObserver' in window) {
-    var band = header.offsetHeight / 2;
     var active = new Set();
+    var themeObserver = null;
 
-    var themeObserver = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            active.add(entry.target);
-          } else {
-            active.delete(entry.target);
-          }
-        });
-        header.classList.toggle('is-dark', active.size > 0);
-      },
-      { rootMargin: '-' + band + 'px 0px -' + (window.innerHeight - band - 1) + 'px 0px' }
-    );
+    /*
+     * rootMargin must be a valid length. In a prerendered page (speculation
+     * rules), a background tab or some in-app browsers, innerHeight can be
+     * 0 at this point, which used to produce "--1px" and throw, killing the
+     * whole script. Round and clamp, and rebuild the band on resize.
+     */
+    var buildThemeObserver = function () {
+      var band = Math.max(0, Math.round(header.offsetHeight / 2));
+      var below = Math.max(0, Math.round((window.innerHeight || document.documentElement.clientHeight || 0) - band - 1));
 
-    darkSections.forEach(function (section) { themeObserver.observe(section); });
+      if (themeObserver) { themeObserver.disconnect(); }
+      active.clear();
+
+      try {
+        themeObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                active.add(entry.target);
+              } else {
+                active.delete(entry.target);
+              }
+            });
+            header.classList.toggle('is-dark', active.size > 0);
+          },
+          { rootMargin: '-' + band + 'px 0px -' + below + 'px 0px' }
+        );
+      } catch (e) {
+        themeObserver = null;
+        return;
+      }
+
+      darkSections.forEach(function (section) { themeObserver.observe(section); });
+    };
+
+    buildThemeObserver();
+
+    var resizeTimer = null;
+    var lastHeight = window.innerHeight;
+    window.addEventListener('resize', function () {
+      // Mobile browsers fire resize when the URL bar slides; only rebuild
+      // on a meaningful change.
+      if (Math.abs(window.innerHeight - lastHeight) < 80) { return; }
+      lastHeight = window.innerHeight;
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(buildThemeObserver, 150);
+    }, { passive: true });
+
+    // A page prerendered at zero height is rebuilt when it is shown.
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && window.innerHeight !== lastHeight) {
+        lastHeight = window.innerHeight;
+        buildThemeObserver();
+      }
+    });
   }
 
   /* --- 3. Mobile overlay -------------------------------------------------- */

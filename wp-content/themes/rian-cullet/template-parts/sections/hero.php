@@ -35,6 +35,8 @@ $rc_slides = rc_hero_slides();
 						'ratio'    => '',
 						'tag'      => 'div',
 						'priority' => 0 === $rc_i,
+						'lowpri'   => 0 !== $rc_i,
+						'sizes'    => '100vw',
 						'width'    => 2400,
 						'height'   => 1350,
 						'note'     => $rc_slide['note'],

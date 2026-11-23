@@ -26,7 +26,7 @@ const RC_SETUP_ACTION = 'rc_install_starter_content';
  * @return array<string, string> Slug => title.
  */
 function rc_required_pages(): array {
-	return array(
+	$pages = array(
 		'home'           => __( 'Home', 'rian-cullet' ),
 		'about'          => __( 'About', 'rian-cullet' ),
 		'glass-cullet'   => __( 'Glass Cullet', 'rian-cullet' ),
@@ -35,6 +35,15 @@ function rc_required_pages(): array {
 		'contact'        => __( 'Contact', 'rian-cullet' ),
 		'privacy-policy' => __( 'Privacy Policy', 'rian-cullet' ),
 	);
+
+	// The search landing pages in inc/seo-pages.php.
+	if ( function_exists( 'rc_seo_pages' ) ) {
+		foreach ( rc_seo_pages() as $slug => $page ) {
+			$pages[ $slug ] = $page['nav'];
+		}
+	}
+
+	return $pages;
 }
 
 /**
@@ -151,6 +160,19 @@ function rc_create_starter_content(): array {
 						'ID'           => $existing->ID,
 						'post_status'  => 'publish',
 						'post_content' => '',
+					)
+				);
+			} elseif (
+				'privacy-policy' !== $slug
+				&& in_array( $existing->post_status, array( 'draft', 'pending', 'auto-draft' ), true )
+				&& '' === trim( (string) $existing->post_content )
+			) {
+				// An empty unpublished page at a theme slug is a 404 in
+				// waiting: the template supplies the content, so publish it.
+				wp_update_post(
+					array(
+						'ID'          => $existing->ID,
+						'post_status' => 'publish',
 					)
 				);
 			}

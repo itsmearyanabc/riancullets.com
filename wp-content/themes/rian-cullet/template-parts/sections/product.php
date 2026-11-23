@@ -64,6 +64,7 @@ $rc_products = array(
 						rc_figure(
 							array(
 								'name'   => $rc_product['image'],
+								'sizes'  => '(min-width: 62rem) 30vw, (min-width: 48rem) 50vw, 100vw',
 								'alt'    => $rc_product['alt'],
 								'ratio'  => 'rc-ratio-portrait',
 								'class'  => 'rc-zoom',
