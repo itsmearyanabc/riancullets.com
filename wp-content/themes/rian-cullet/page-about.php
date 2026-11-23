@@ -77,8 +77,9 @@ get_template_part(
 						'alt'    => __( 'Recovered glass being sorted and graded before processing.', 'rian-cullet' ),
 						'ratio'  => 'rc-ratio-portrait',
 						'class'  => 'rc-zoom',
-						'width'  => 1200,
-						'height' => 1500,
+						'width'  => 1800,
+						'height' => 1200,
+						'sizes'  => '(min-width: 62rem) 40vw, 100vw',
 						'note'   => __( 'Sorting and grading recovered glass, 4:5 portrait.', 'rian-cullet' ),
 					)
 				);
