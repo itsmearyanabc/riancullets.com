@@ -1,0 +1,13 @@
+# Old WordPress URLs that search engines may have indexed.
+/home/                          /                 301
+/hello-world/                   /                 301
+/sample-page/                   /                 301
+/wp-sitemap.xml                 /sitemap.xml      301
+/wp-sitemap-posts-page-1.xml    /sitemap.xml      301
+/wp-sitemap-posts-post-1.xml    /sitemap.xml      301
+/sitemap_index.xml              /sitemap.xml      301
+/feed/                          /                 301
+/comments/feed/                 /                 301
+/wp-admin/*                     /                 302
+/wp-login.php                   /                 302
+/favicon.ico                    /wp-content/themes/rian-cullet/assets/img/favicon-32.png  301

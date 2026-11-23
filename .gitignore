@@ -15,3 +15,6 @@ desktop.ini
 # Build output
 node_modules/
 *.log
+
+# Built theme package
+rian-cullet.zip

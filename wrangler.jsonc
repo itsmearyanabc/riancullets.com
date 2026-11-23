@@ -1,0 +1,26 @@
+// Cloudflare Worker for riancullets.com.
+// Deploy command (Workers Builds): npx wrangler deploy   (no build command)
+//
+// "name" must match the Worker's name in the Cloudflare dashboard; change it
+// here if yours differs.
+{
+  "name": "riancullets-com",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "cloudflare/public",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": { "enabled": true },
+
+  // Keep ENQUIRY_TO / ENQUIRY_FROM set in the dashboard across deploys.
+  "keep_vars": true
+
+  // Enquiry storage. Create a KV namespace (Storage & Databases > KV),
+  // then uncomment and paste its id. Email settings (RESEND_API_KEY,
+  // ENQUIRY_TO, ENQUIRY_FROM) go in the Worker's Settings > Variables.
+  // ,"kv_namespaces": [{ "binding": "ENQUIRIES", "id": "<kv-namespace-id>" }]
+}

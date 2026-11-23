@@ -44,6 +44,17 @@ $rc_channels = rc_contact_channels();
 				?>
 			</nav>
 
+			<?php if ( function_exists( 'rc_seo_pages' ) ) : ?>
+				<nav class="rc-footer__nav rc-footer__nav--more" aria-label="<?php esc_attr_e( 'Cullet and services', 'rian-cullet' ); ?>">
+					<h2 class="rc-footer__heading"><?php esc_html_e( 'Cullet & services', 'rian-cullet' ); ?></h2>
+					<ul class="rc-footer__list">
+						<?php foreach ( rc_seo_pages() as $rc_slug => $rc_seo ) : ?>
+							<li><a href="<?php echo esc_url( rc_seo_page_url( $rc_slug ) ); ?>"><?php echo esc_html( $rc_seo['nav'] ); ?></a></li>
+						<?php endforeach; ?>
+					</ul>
+				</nav>
+			<?php endif; ?>
+
 			<address class="rc-footer__address">
 				<h2 class="rc-sr-only"><?php esc_html_e( 'Registered address', 'rian-cullet' ); ?></h2>
 				<span><?php echo esc_html( $rc_address['street'] ); ?></span>

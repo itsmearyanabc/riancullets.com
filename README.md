@@ -10,11 +10,23 @@ No page builder. No CSS framework. No JavaScript libraries.
 
 ## Installing on a live WordPress site
 
-1. Build the theme zip from the repository root:
+1. Rebuild the bundled assets if any CSS, JS or photograph changed, then
+   build the theme zip from the repository root:
 
    ```bash
+   python3 tools/build-assets.py   # CSS + JS -> assets/dist/
+   tools/build-images.sh           # responsive AVIF/WebP (needs ffmpeg)
    git archive --format=zip --prefix=rian-cullet/ -o rian-cullet.zip HEAD:wp-content/themes/rian-cullet
    ```
+
+   **Updating an existing install:** Appearance → Themes → Add New →
+   Upload Theme, then choose **Replace current with uploaded**. Since
+   v1.2.0 the theme provisions itself on the first request after an
+   update: it creates any missing pages (including the SEO landing pages
+   in `inc/seo-pages.php`), publishes empty drafts at theme slugs, fixes a
+   Site Title left as the bare domain, trashes untouched sample content,
+   flushes permalinks and purges LiteSpeed Cache. Steps 3–5 below are
+   then only a fallback.
 
 2. In wp-admin: **Appearance → Themes → Add New → Upload Theme**, choose
    `rian-cullet.zip`, then **Activate**.
@@ -30,6 +42,13 @@ No page builder. No CSS framework. No JavaScript libraries.
 That is the whole setup. The pages need no content: every page is a
 template in this theme, so it looks exactly like the design preview
 from the moment it is activated.
+
+## Live hosting: Cloudflare
+
+The production site is a static export served by a Cloudflare Worker
+(`wrangler.jsonc`), which also handles the enquiry form. See
+[`cloudflare/README.md`](cloudflare/README.md) for deployment, form
+delivery settings and the update workflow.
 
 ## Staging on Render
 

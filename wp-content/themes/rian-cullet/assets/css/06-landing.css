@@ -1,0 +1,190 @@
+/* ==========================================================================
+   LANDING PAGES - breadcrumb, content rows, lists, questions, related links
+   Used by seo-landing.php. Built from the same tokens and idioms as the
+   core pages: hairlines, not boxes; amber as rule, never as text on paper.
+   ========================================================================== */
+
+/* --- Breadcrumb ------------------------------------------------------------ */
+
+.rc-crumbs { margin-block-end: var(--rc-space-6); }
+.rc-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rc-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--rc-size-small);
+  color: var(--rc-ink-muted);
+}
+.rc-crumbs li + li::before {
+  content: "/";
+  margin-inline-end: var(--rc-space-2);
+  color: var(--rc-hairline);
+}
+.rc-crumbs a {
+  color: var(--rc-ink-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--rc-amber);
+  text-underline-offset: 0.25em;
+}
+.rc-crumbs a:hover,
+.rc-crumbs a:focus-visible { color: var(--rc-ink); }
+.rc-crumbs [aria-current] { color: var(--rc-ink); }
+
+/* --- Intro ----------------------------------------------------------------- */
+
+.rc-landing__intro { font-size: var(--rc-size-lede); line-height: 1.65; }
+.rc-landing__intro + .rc-landing__intro { margin-block-start: var(--rc-space-5); }
+.rc-landing__actions { margin-block-start: var(--rc-space-7); }
+
+/* --- Content rows ------------------------------------------------------------ */
+
+.rc-landing__section + .rc-landing__section { padding-block-start: 0; }
+.rc-landing__row {
+  padding-block-start: var(--rc-space-7);
+  border-block-start: var(--rc-border) solid var(--rc-hairline);
+}
+.rc-landing__row .rc-index { display: block; margin-block-end: var(--rc-space-4); }
+.rc-landing__row .rc-body + .rc-landing__list,
+.rc-landing__list + .rc-landing__after { margin-block-start: var(--rc-space-5); }
+
+.rc-landing__list {
+  display: grid;
+  gap: var(--rc-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: var(--rc-measure-body);
+}
+.rc-landing__list li {
+  position: relative;
+  padding-inline-start: var(--rc-space-6);
+  font-size: var(--rc-size-body);
+  line-height: var(--rc-lh-body);
+  color: var(--rc-ink-muted);
+}
+.rc-landing__list li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0.8em;
+  inline-size: 0.9rem;
+  block-size: var(--rc-border);
+  background: var(--rc-amber);
+}
+
+.rc-landing__list--steps { counter-reset: rc-step; }
+.rc-landing__list--steps li { counter-increment: rc-step; padding-inline-start: var(--rc-space-7); }
+.rc-landing__list--steps li::before {
+  content: counter(rc-step, decimal-leading-zero);
+  inset-block-start: 0.1em;
+  inline-size: auto;
+  block-size: auto;
+  background: none;
+  font-size: var(--rc-size-small);
+  font-weight: 600;
+  letter-spacing: var(--rc-track-label);
+  color: var(--rc-amber-ink);
+}
+
+/* --- Questions --------------------------------------------------------------- */
+
+.rc-faq { border-block-start: var(--rc-border) solid var(--rc-hairline); }
+.rc-faq__item { border-block-end: var(--rc-border) solid var(--rc-hairline); }
+.rc-faq__q {
+  position: relative;
+  display: block;
+  padding-block: var(--rc-space-5);
+  padding-inline-end: var(--rc-space-7);
+  font-size: var(--rc-size-h3);
+  line-height: var(--rc-lh-snug);
+  color: var(--rc-ink);
+  cursor: pointer;
+  list-style: none;
+}
+.rc-faq__q::-webkit-details-marker { display: none; }
+.rc-faq__q::after {
+  content: "+";
+  position: absolute;
+  inset-inline-end: 0.25em;
+  inset-block-start: var(--rc-space-5);
+  inline-size: 1em;
+  line-height: 1em;
+  text-align: center;
+  font-weight: 300;
+  color: var(--rc-amber-ink);
+  transform-origin: 50% 50%;
+  transition: transform var(--rc-dur-standard) var(--rc-ease-out);
+}
+.rc-faq__item[open] > .rc-faq__q::after { transform: rotate(45deg); }
+.rc-faq__q:focus-visible { outline: 2px solid var(--rc-focus); outline-offset: 4px; }
+.rc-faq__a { padding-block-end: var(--rc-space-6); }
+
+/* --- Related links --------------------------------------------------------- */
+
+.rc-related {
+  margin: var(--rc-space-8) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.rc-related__link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rc-space-3);
+  block-size: 100%;
+  padding-block: var(--rc-space-5) var(--rc-space-6);
+  padding-inline-end: var(--rc-space-6);
+  border-block-start: var(--rc-border) solid var(--rc-hairline);
+  color: var(--rc-ink);
+  text-decoration: none;
+}
+.rc-related__link::before {
+  content: "";
+  position: absolute;
+  inset-block-start: calc(var(--rc-border) * -1);
+  inset-inline: 0;
+  block-size: 2px;
+  background: var(--rc-amber);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--rc-dur-standard) var(--rc-ease-out);
+}
+.rc-related__link:hover::before,
+.rc-related__link:focus-visible::before { transform: scaleX(1); }
+.rc-related__title { font-size: var(--rc-size-h3); line-height: var(--rc-lh-snug); }
+.rc-related__arrow {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: var(--rc-space-5);
+  color: var(--rc-amber-ink);
+}
+
+/* --- Footer: second link column -------------------------------------------- */
+
+.rc-footer__heading {
+  margin: 0 0 var(--rc-space-4);
+  font-family: var(--rc-font-sans);
+  font-size: var(--rc-size-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--rc-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--rc-paper-muted);
+}
+
+@media (min-width: 62rem) {
+  .rc-footer__top { grid-template-columns: 1.6fr 0.9fr 1.3fr 1.2fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rc-related__link::before,
+  .rc-faq__q::after { transition: none; }
+}
+
+/* --- Colour section: links to the colour pages ----------------------------- */
+.rc-colour__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rc-space-3) var(--rc-space-6);
+}

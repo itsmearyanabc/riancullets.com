@@ -39,6 +39,13 @@ $rc_colours = array(
 			<?php rc_eyebrow( __( 'Colour', 'rian-cullet' ) ); ?>
 			<h2 class="rc-display-2" id="rc-colour-title"><?php esc_html_e( 'Every colour has another cycle.', 'rian-cullet' ); ?></h2>
 			<p class="rc-lede"><?php esc_html_e( 'Cullet is sorted by colour because colour determines where the glass can go next.', 'rian-cullet' ); ?></p>
+			<?php if ( function_exists( 'rc_seo_page_url' ) ) : ?>
+				<p class="rc-colour__links">
+					<a class="rc-link" href="<?php echo esc_url( rc_seo_page_url( 'flint-glass-cullet' ) ); ?>"><?php esc_html_e( 'Flint (clear) cullet', 'rian-cullet' ); ?></a>
+					<a class="rc-link" href="<?php echo esc_url( rc_seo_page_url( 'amber-glass-cullet' ) ); ?>"><?php esc_html_e( 'Amber cullet', 'rian-cullet' ); ?></a>
+					<a class="rc-link" href="<?php echo esc_url( rc_seo_page_url( 'green-glass-cullet' ) ); ?>"><?php esc_html_e( 'Green cullet', 'rian-cullet' ); ?></a>
+				</p>
+			<?php endif; ?>
 		</div>
 	</div>
 
@@ -53,6 +60,7 @@ $rc_colours = array(
 						'ratio'  => '',
 						'class'  => 'rc-panel__figure',
 						'tag'    => 'div',
+						'sizes'  => '(min-width: 48rem) 34vw, 80vw',
 						'width'  => 1200,
 						'height' => 1600,
 						'note'   => $rc_colour['note'],

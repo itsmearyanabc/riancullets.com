@@ -23,6 +23,31 @@ add_action( 'wp_enqueue_scripts', 'rc_enqueue_assets' );
  */
 function rc_enqueue_assets(): void {
 
+	/*
+	 * Production bundle. tools/build-assets.sh concatenates and minifies
+	 * the seven stylesheets and five scripts into one file each, which
+	 * cuts eleven render-path requests down to two. The source files stay
+	 * the layer developers edit; delete assets/dist/ to load them directly.
+	 */
+	$dist_css = RC_DIR . '/assets/dist/site.min.css';
+	$dist_js  = RC_DIR . '/assets/dist/site.min.js';
+
+	if ( file_exists( $dist_css ) && file_exists( $dist_js ) && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ) {
+		wp_enqueue_style( 'rc-site', RC_URI . '/assets/dist/site.min.css', array(), (string) filemtime( $dist_css ) );
+		wp_enqueue_script(
+			'rc-site',
+			RC_URI . '/assets/dist/site.min.js',
+			array(),
+			(string) filemtime( $dist_js ),
+			array(
+				'strategy'  => 'defer',
+				'in_footer' => true,
+			)
+		);
+		wp_register_style( 'rian-cullet', get_stylesheet_uri(), array(), RC_VERSION );
+		return;
+	}
+
 	$css = array(
 		'rc-tokens'     => '00-tokens.css',
 		'rc-reset'      => '01-reset.css',
@@ -30,6 +55,7 @@ function rc_enqueue_assets(): void {
 		'rc-layout'     => '03-layout.css',
 		'rc-components' => '04-components.css',
 		'rc-sections'   => '05-sections.css',
+		'rc-landing'    => '06-landing.css',
 		'rc-motion'     => '07-motion.css',
 	);
 
@@ -85,6 +111,26 @@ add_action( 'wp_head', 'rc_head_critical', 1 );
  */
 function rc_head_critical(): void {
 	echo "<script>document.documentElement.classList.add('rc-js');</script>\n";
+
+	// The first hero slide is the Largest Contentful Paint. Preloading it
+	// lets the browser fetch it in parallel with the stylesheet instead of
+	// discovering it only after layout.
+	if ( is_front_page() && function_exists( 'rc_hero_slides' ) ) {
+		$slides = rc_hero_slides();
+		$name   = (string) ( $slides[0]['image'] ?? '' );
+		$src    = $name ? rc_image_sources( $name ) : array();
+
+		foreach ( array( 'avif' => 'image/avif', 'webp' => 'image/webp' ) as $ext => $type ) {
+			if ( isset( $src[ $ext ] ) ) {
+				printf(
+					'<link rel="preload" as="image" type="%1$s" imagesrcset="%2$s" imagesizes="100vw" fetchpriority="high">' . "\n",
+					esc_attr( $type ),
+					rc_image_srcset( $name, $ext, $src[ $ext ], 2400 ) // phpcs:ignore WordPress.Security.EscapeOutput -- escaped per URL.
+				);
+				break;
+			}
+		}
+	}
 }
 
 add_filter( 'style_loader_tag', 'rc_preload_fonts', 10, 2 );
@@ -97,7 +143,7 @@ add_filter( 'style_loader_tag', 'rc_preload_fonts', 10, 2 );
  */
 function rc_preload_fonts( string $tag, string $handle ): string {
 
-	if ( 'rc-typography' !== $handle ) {
+	if ( 'rc-typography' !== $handle && 'rc-site' !== $handle ) {
 		return $tag;
 	}
 
