@@ -111,6 +111,17 @@
   background-color: var(--rc-stone);
   border-radius: var(--rc-radius);
 }
+/* The <picture> wrapper must carry the frame's height too. Without it the
+   image's 100% height resolved against an auto-height <picture>, so any
+   photo whose shape differed from its frame (a landscape photo in a
+   portrait frame on About) filled only part of it and left the stone
+   background showing. Frames without a fixed ratio are unaffected:
+   100% of an auto height is still auto. */
+.rc-figure > picture {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
 .rc-figure img {
   inline-size: 100%;
   block-size: 100%;
